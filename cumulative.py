@@ -6,10 +6,10 @@ hqn006@ucsd.edu
 """
 
 
-import math
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from scipy.special import comb
 
 import streamlit as st
 
@@ -151,7 +151,7 @@ def calc_prob( P_des, p, r, n_max, complementary, inclusive ):
         # Sum up all exactly x successes
         sum_exactly = 0
         for k in range(r_inclusive, -1, -1):
-            exactly = math.comb(n,k) * p**k * (1-p)**(n-k)
+            exactly = comb(n,k) * p**k * (1-p)**(n-k)
             sum_exactly += exactly
 
         # Probability array
