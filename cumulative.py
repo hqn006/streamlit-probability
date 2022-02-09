@@ -5,11 +5,11 @@ hqn006@ucsd.edu
 
 """
 
+from math import comb
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from scipy.special import comb
 
 import streamlit as st
 
