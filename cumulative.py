@@ -1,5 +1,4 @@
-"""
-App for calculating the cumulative probability of `r` successes in `n` trials.
+"""App for calculating the cumulative probability of `r` successes in `n` trials.
 
 Huy Nguyen
 hqn006@ucsd.edu
