@@ -3,6 +3,8 @@
 Huy Nguyen
 hqn006@ucsd.edu
 
+9 February 2022
+
 """
 
 from math import comb
@@ -33,7 +35,7 @@ def main( ):
     # DataFrane
     with left_column:
         df = output_data(N, P, n_found, P_found)
-        download_df( df )
+        download_df(df)
     
     # Plot
     with right_column:
@@ -98,11 +100,12 @@ def range_cond( ):
     else:
         out_txt = ("At Most" if inclusive else "Less Than")
 
-    "Output text: ", out_txt, " *r* Successes"
+    "Description: ", out_txt, " *r* Successes"
 
     return complementary, inclusive, out_txt
 
 
+@st.cache
 def calc_prob( P_des, p, r, n_max, complementary, inclusive ):
     """Calculate cumulative probabilities.
 
@@ -161,9 +164,13 @@ def calc_prob( P_des, p, r, n_max, complementary, inclusive ):
             P[i] = sum_exactly
 
         # Store found values
-        if 1 - sum_exactly > P_des and n_found <= 0:
-            n_found = n
-            P_found = P[i]
+        if n_found <= 0:
+            if (
+                    (complementary and 1 - sum_exactly > P_des) or
+                    (not complementary and sum_exactly < P_des)
+                ):
+                n_found = n
+                P_found = P[i]
 
         i += 1
     
@@ -209,7 +216,12 @@ def download_df( df ):
         Dataframe containing `N` and `P` arrays
     """
 
-    csv = df.to_csv().encode('utf-8')
+    @st.cache
+    def convert_df(df):
+        # IMPORTANT: Cache the conversion to prevent computation on every rerun
+        return df.to_csv().encode('utf-8')
+
+    csv = convert_df(df)
     st.download_button("Download as CSV", csv, 'cumulative_df.csv', 'text/csv')
 
     return None
