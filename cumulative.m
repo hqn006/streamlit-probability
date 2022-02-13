@@ -5,11 +5,6 @@
 % P(at least r successes) = 1 - P(at most r-1 successes)
 %                         = 1 - P(exactly r-1 successes) - P(exactly r-2
 %                         successes) ... - P(exactly 0 successes)
-%
-% Huy Nguyen
-% hqn006@ucsd.edu
-%
-% Created: 8 January 2022
 
 clearvars
 close all
