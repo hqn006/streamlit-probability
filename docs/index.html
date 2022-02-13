@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
 <title>cumulative API documentation</title>
-<meta name="description" content="App for calculating the cumulative probability of *r* successes in *n* trials …" />
+<meta name="description" content="App for calculating the cumulative probability of *r* successes in *n* trials.
+Determine the number of trials needed to reach a certain probability …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -23,7 +24,8 @@
 <h1 class="title">Module <code>cumulative</code></h1>
 </header>
 <section id="section-intro">
-<p>App for calculating the cumulative probability of <em>r</em> successes in <em>n</em> trials.</p>
+<p>App for calculating the cumulative probability of <em>r</em> successes in <em>n</em> trials.
+Determine the number of trials needed to reach a certain probability threshold.</p>
 <p><a href="https://share.streamlit.io/hqn006/streamlit-probability/main/cumulative.py">Streamlit</a><br>
 <a href="https://github.com/hqn006/streamlit-probability">GitHub</a></p>
 <h2 id="definition-of-cumulative-probability"><a href="https://en.wikipedia.org/wiki/Cumulative_distribution_function">Definition of Cumulative Probability</a></h2>
@@ -38,7 +40,7 @@ distribution function is given by</p>
 theorem.</p>
 <p><span><span class="MathJax_Preview"> P(X = x) = \binom{n}{x} p^x (1-p)^{n-x} </span><script type="math/tex; mode=display"> P(X = x) = \binom{n}{x} p^x (1-p)^{n-x} </script></span></p>
 <p>This module uses the <a href="https://docs.python.org/3/library/math.html"><code>math.comb</code></a>
-function.</p>
+function for "n choose k" type calculations.</p>
 <h3 id="probability-of-at-most-r-successes">Probability of "at most <em>r</em> successes"</h3>
 <p>Sum all probabilities that <em>X</em> will take values within a range of "at most <em>r</em>
 successes" with</p>
@@ -57,6 +59,7 @@ of "at most <em>r</em> successes"</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;App for calculating the cumulative probability of *r* successes in *n* trials.
+Determine the number of trials needed to reach a certain probability threshold.
 
 [Streamlit](https://share.streamlit.io/hqn006/streamlit-probability/main/cumulative.py)  
 [GitHub](https://github.com/hqn006/streamlit-probability)
@@ -83,7 +86,7 @@ theorem.
 $$ P(X = x) = \\binom{n}{x} p^x (1-p)^{n-x} $$
 
 This module uses the [`math.comb`](https://docs.python.org/3/library/math.html)
-function.
+function for &#34;n choose k&#34; type calculations.
 
 
 ### Probability of &#34;at most *r* successes&#34;
