@@ -1,3 +1,5 @@
+% FOR REFERENCE ONLY
+%
 % Cumulative probability of "at least r successes in n trials"
 %
 % P(at least r successes) = 1 - P(at most r-1 successes)
