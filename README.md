@@ -7,4 +7,4 @@ Determine the number of trials needed to reach a certain probability threshold.
 
 [Streamlit.io - Cumulative Probability Calculator](https://share.streamlit.io/hqn006/streamlit-probability/main/cumulative.py)
 
-[Documentation](https://htmlpreview.github.io/?https://github.com/hqn006/streamlit-probability/blob/main/html/cumulative.html)
+[Documentation](https://hqn006.github.io/streamlit-probability/)
