@@ -18,6 +18,10 @@ The variables *x* and *r* are used interchangeably in this document.
 
 ## Calculating Cumulative Probability
 
+This module examines the case where *X* is a binomial distribution with *r* being
+the number of desired successes, *p* being the probability of success for each trial,
+and *n* ranging from *r* to a maximum input value.
+
 ### Probability of "exactly *r* successes"
 
 To calculate the the probability of *x* successes in *n* trials, use the binomial
@@ -34,11 +38,11 @@ function for "n choose k" type calculations.
 Sum all probabilities that *X* will take values within a range of "at most *r*
 successes" with
 
-$$ P(X \\leq x) = P(X = 0) + P(X = 1) + \\cdots + P(X = x) $$
+$$ P(X \\leq x) = \\sum_{k=0}^{r} P(X = k) $$
 
 It follows that the probability of "less than *r* successes" is
 
-$$ P(X < x) = P(X = 0) + P(X = 1) + \\cdots + P(X = x-1) $$
+$$ P(X < x) = \\sum_{k=0}^{r-1} P(X = k) $$
 
 
 ### Probability of "at least *r* successes"
@@ -96,7 +100,7 @@ def main():
 class Cumulative:
 
     def __init__(self, r, n_max):
-        """Initialize Cumulative class.
+        """Initialize Cumulative class containing probability calculations.
 
         Parameters
         ----------
@@ -117,7 +121,8 @@ class Cumulative:
 
 
     def calc(self, P_des, p, r, complementary, inclusive):
-        """Calculate cumulative probabilities.
+        """Calculate cumulative probabilities. Store closest value that crosses
+        the input probability threshold.
 
         Parameters
         ----------

@@ -35,6 +35,9 @@ distribution function is given by</p>
 <p><span><span class="MathJax_Preview"> F_X(x) = P(X \leq x) </span><script type="math/tex; mode=display"> F_X(x) = P(X \leq x) </script></span></p>
 <p>The variables <em>x</em> and <em>r</em> are used interchangeably in this document.</p>
 <h2 id="calculating-cumulative-probability">Calculating Cumulative Probability</h2>
+<p>This module examines the case where <em>X</em> is a binomial distribution with <em>r</em> being
+the number of desired successes, <em>p</em> being the probability of success for each trial,
+and <em>n</em> ranging from <em>r</em> to a maximum input value.</p>
 <h3 id="probability-of-exactly-r-successes">Probability of "exactly <em>r</em> successes"</h3>
 <p>To calculate the the probability of <em>x</em> successes in <em>n</em> trials, use the binomial
 theorem.</p>
@@ -44,9 +47,9 @@ function for "n choose k" type calculations.</p>
 <h3 id="probability-of-at-most-r-successes">Probability of "at most <em>r</em> successes"</h3>
 <p>Sum all probabilities that <em>X</em> will take values within a range of "at most <em>r</em>
 successes" with</p>
-<p><span><span class="MathJax_Preview"> P(X \leq x) = P(X = 0) + P(X = 1) + \cdots + P(X = x) </span><script type="math/tex; mode=display"> P(X \leq x) = P(X = 0) + P(X = 1) + \cdots + P(X = x) </script></span></p>
+<p><span><span class="MathJax_Preview"> P(X \leq x) = \sum_{k=0}^{r} P(X = k) </span><script type="math/tex; mode=display"> P(X \leq x) = \sum_{k=0}^{r} P(X = k) </script></span></p>
 <p>It follows that the probability of "less than <em>r</em> successes" is</p>
-<p><span><span class="MathJax_Preview"> P(X &lt; x) = P(X = 0) + P(X = 1) + \cdots + P(X = x-1) </span><script type="math/tex; mode=display"> P(X < x) = P(X = 0) + P(X = 1) + \cdots + P(X = x-1) </script></span></p>
+<p><span><span class="MathJax_Preview"> P(X &lt; x) = \sum_{k=0}^{r-1} P(X = k) </span><script type="math/tex; mode=display"> P(X < x) = \sum_{k=0}^{r-1} P(X = k) </script></span></p>
 <h3 id="probability-of-at-least-r-successes">Probability of "at least <em>r</em> successes"</h3>
 <p>Obtain the probability of "greather than <em>r</em> successes" using the complemenent
 of "at most <em>r</em> successes"</p>
@@ -78,6 +81,10 @@ The variables *x* and *r* are used interchangeably in this document.
 
 ## Calculating Cumulative Probability
 
+This module examines the case where *X* is a binomial distribution with *r* being
+the number of desired successes, *p* being the probability of success for each trial,
+and *n* ranging from *r* to a maximum input value.
+
 ### Probability of &#34;exactly *r* successes&#34;
 
 To calculate the the probability of *x* successes in *n* trials, use the binomial
@@ -94,11 +101,11 @@ function for &#34;n choose k&#34; type calculations.
 Sum all probabilities that *X* will take values within a range of &#34;at most *r*
 successes&#34; with
 
-$$ P(X \\leq x) = P(X = 0) + P(X = 1) + \\cdots + P(X = x) $$
+$$ P(X \\leq x) = \\sum_{k=0}^{r} P(X = k) $$
 
 It follows that the probability of &#34;less than *r* successes&#34; is
 
-$$ P(X &lt; x) = P(X = 0) + P(X = 1) + \\cdots + P(X = x-1) $$
+$$ P(X &lt; x) = \\sum_{k=0}^{r-1} P(X = k) $$
 
 
 ### Probability of &#34;at least *r* successes&#34;
@@ -156,7 +163,7 @@ def main():
 class Cumulative:
 
     def __init__(self, r, n_max):
-        &#34;&#34;&#34;Initialize Cumulative class.
+        &#34;&#34;&#34;Initialize Cumulative class containing probability calculations.
 
         Parameters
         ----------
@@ -177,7 +184,8 @@ class Cumulative:
 
 
     def calc(self, P_des, p, r, complementary, inclusive):
-        &#34;&#34;&#34;Calculate cumulative probabilities.
+        &#34;&#34;&#34;Calculate cumulative probabilities. Store closest value that crosses
+        the input probability threshold.
 
         Parameters
         ----------
@@ -549,7 +557,7 @@ if __name__ == &#39;__main__&#39;:
 <span>(</span><span>r, n_max)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Initialize Cumulative class.</p>
+<div class="desc"><p>Initialize Cumulative class containing probability calculations.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>r</code></strong> :&ensp;<code>int</code></dt>
@@ -564,7 +572,7 @@ if __name__ == &#39;__main__&#39;:
 <pre><code class="python">class Cumulative:
 
     def __init__(self, r, n_max):
-        &#34;&#34;&#34;Initialize Cumulative class.
+        &#34;&#34;&#34;Initialize Cumulative class containing probability calculations.
 
         Parameters
         ----------
@@ -585,7 +593,8 @@ if __name__ == &#39;__main__&#39;:
 
 
     def calc(self, P_des, p, r, complementary, inclusive):
-        &#34;&#34;&#34;Calculate cumulative probabilities.
+        &#34;&#34;&#34;Calculate cumulative probabilities. Store closest value that crosses
+        the input probability threshold.
 
         Parameters
         ----------
@@ -705,7 +714,8 @@ if __name__ == &#39;__main__&#39;:
 <span>def <span class="ident">calc</span></span>(<span>self, P_des, p, r, complementary, inclusive)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Calculate cumulative probabilities.</p>
+<div class="desc"><p>Calculate cumulative probabilities. Store closest value that crosses
+the input probability threshold.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>P_des</code></strong> :&ensp;<code>float</code></dt>
@@ -724,7 +734,8 @@ if __name__ == &#39;__main__&#39;:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def calc(self, P_des, p, r, complementary, inclusive):
-    &#34;&#34;&#34;Calculate cumulative probabilities.
+    &#34;&#34;&#34;Calculate cumulative probabilities. Store closest value that crosses
+    the input probability threshold.
 
     Parameters
     ----------
