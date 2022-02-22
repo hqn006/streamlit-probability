@@ -85,7 +85,7 @@ def main():
     probs = Cumulative(r, n_max)
     probs.calc(P_des, p, r, complementary, inclusive)
 
-    # DataFrane
+    # DataFrame
     with left_column:
         df = probs.show_data()
         download_df(df)
@@ -169,6 +169,8 @@ class Cumulative:
                     self.P_found = self.P[i]
 
             i += 1
+        
+        return None
     
 
     def show_data(self):
