@@ -1,5 +1,6 @@
 """App for calculating the cumulative probability of *r* successes in *n* trials.
-Determine the number of trials needed to reach a certain probability threshold.
+Determine the number of trials needed to reach a certain probability threshold
+or find the probability at a specified number of trials.
 
 [Streamlit](https://share.streamlit.io/hqn006/streamlit-probability/main/cumulative.py)  
 [GitHub](https://github.com/hqn006/streamlit-probability)
@@ -69,13 +70,13 @@ import streamlit as st
 
 
 def main():
-    """Main function."""
+    """Main function. Set up widgets, calculate, plot."""
 
     st.set_page_config(layout='wide')
 
     # Set up sidebar input widgets
     with st.sidebar:
-        P_des, p, r, n_max = params()
+        P_des, n_des, p, r, n_max = params()
         complementary, inclusive, out_txt = range_cond()
     
     # Proportions of output screen
@@ -83,7 +84,8 @@ def main():
 
     # Calculations
     probs = Cumulative(r, n_max)
-    probs.calc(P_des, p, r, complementary, inclusive)
+    probs.calc(p, r, complementary, inclusive)
+    probs.find_desired(P_des, n_des, complementary)
 
     # DataFrame
     with left_column:
@@ -115,19 +117,20 @@ class Cumulative:
         self.P = np.zeros(self.N.shape)
         """Array of cumulative probabilities corresponding to `N`"""
         self.n_found = -1
-        """Number of trials closest to desired cumulative probability"""
-        self.P_found = 0
-        """Cumulative probability closest to desired"""
+        """Number of trials closest to desired cumulative probability (see `P_des`)"""
+        self.P_closest = 0
+        """Cumulative probability closest to desired (see `P_des`)"""
+        self.P_found = -1
+        """Cumulative probability found at desired number of trials (see `n_des`)"""
+        self.n_closest = 0
+        """Number of trials closest to desired (equal to `n_des`)"""
 
 
-    def calc(self, P_des, p, r, complementary, inclusive):
-        """Calculate cumulative probabilities. Store closest value that crosses
-        the input probability threshold.
+    def calc(self, p, r, complementary, inclusive):
+        """Calculate cumulative probabilities.
 
         Parameters
         ----------
-        P_des : float
-            Desired cumulative probability
         p : float
             Probability of one successful event
         r : int
@@ -159,17 +162,45 @@ class Cumulative:
             else:
                 self.P[i] = sum_exactly
 
-            # Store found values
-            if self.n_found <= 0:
-                if (
-                        (complementary and 1 - sum_exactly > P_des) or
-                        (not complementary and sum_exactly < P_des)
-                    ):
-                    self.n_found = n
-                    self.P_found = self.P[i]
-
             i += 1
         
+        return None
+    
+
+    def find_desired(self, P_des, n_des, complementary):
+        """Find closest number of trials that crosses the input probability threshold.
+        Find probability at the input number of trials.
+    
+        Parameters
+        ----------
+        P_des : float
+            Desired cumulative probability if wanting to find number of trials needed
+        n_des : int
+            Desired number of trials if wanting to find cumulative probability at a point
+        complementary : bool
+            Specifies cumulative probability or its complement
+        """
+
+        i = 0 # index in P array
+        for n in self.N:
+
+            # Store point at input desired probability
+            if self.n_found <= 0:
+                if (
+                        (complementary and self.P[i] > P_des) or
+                        (not complementary and self.P[i] < P_des)
+                    ):
+                    self.n_found = n
+                    self.P_closest = self.P[i]
+            
+            # Store point at input number of trials
+            if self.P_found <= 0:
+                if n == n_des:
+                    self.P_found = self.P[i]
+                    self.n_closest = n_des
+            
+            i += 1
+
         return None
     
 
@@ -183,14 +214,26 @@ class Cumulative:
             Dataframe containing `N` and `P` arrays
         """
 
-        st.write("Desired Cumulative Probability", \
-            "**FOUND**" if self.n_found > 0 else "**NOT FOUND**")
+        # Found point at input desired probability
+        if self.n_found > 0:
+            st.success("Desired Cumulative Probability **FOUND**")
+        else:
+            st.warning("Desired Cumulative Probability **NOT FOUND**")
 
+        st.write("Cumulative Probability:", self.P_closest)
         st.write("Number of trials:", self.n_found)
+
+        # Found point at input number of trials
+        if self.P_found > 0:
+            st.success("Probability at Number of Trials **FOUND**")
+        else:
+            st.warning("Probability at Number of Trials **NOT FOUND**")
+        
+        st.write("Number of trials:", self.n_closest)
         st.write("Cumulative Probability:", self.P_found)
 
         df = pd.DataFrame({'N': self.N, 'P': self.P})
-        st.dataframe(df, None, 1000)
+        st.dataframe(df, None, 700)
 
         return df
     
@@ -211,8 +254,17 @@ class Cumulative:
         ax.set_xlabel("Number of Trials")
         ax.set_ylabel("Cumulative Probability")
         ax.plot(self.N, self.P)
-        ax.plot(self.n_found, self.P_found, 'ro')
-        ax.text(self.n_found, self.P_found, f'({self.n_found}, {self.P_found:.3f})')
+
+        # Point at input desired probability
+        ax.hlines(self.P_closest, 0, self.N[-1], 'r', 'dashed')
+        ax.text(self.n_found, self.P_closest + 0.01,
+                f'({self.n_found}, {self.P_closest:.3f})')
+
+        # Point at input number of trials
+        ax.plot(self.n_closest, self.P_found, 'r+')
+        ax.text(self.n_closest, self.P_found + 0.01,
+                f'({self.n_closest}, {self.P_found:.3f})')
+
         ax.set_ylim(0,1)
 
         st.pyplot(fig)
@@ -226,7 +278,9 @@ def params():
     Returns
     -------
     P_des : float
-        Desired cumulative probability
+        Desired cumulative probability if wanting to find number of trials needed
+    n_des : int
+        Desired number of trials if wanting to find cumulative probability at a point
     p : float
         Probability of one successful event
     r : int
@@ -242,15 +296,23 @@ def params():
         0.0, 1.0, 0.5,
         step=0.1, format="%.3f"
         )
+    n_des = st.number_input(
+        "Find Probability at Number of Trials",
+        value=-1,
+        step=1
+        )
+    
+    "---"
+
     p = st.number_input(
         "Probability of event",
         0.0, 1.0, 0.01,
         step=0.001, format="%.4f"
         )
     r = st.number_input("Number of successes", 1)
-    n_max = st.number_input("Max number of trials", 1, value=500, step=100)
+    n_max = st.number_input("Max number of trials", 1, value=500, step=100) + 1
 
-    return P_des, p, r, n_max
+    return P_des, n_des, p, r, n_max
 
 
 def range_cond():
@@ -276,7 +338,7 @@ def range_cond():
     else:
         out_txt = ("At Most" if inclusive else "Less Than")
 
-    "Description: ", out_txt, " *r* Successes"
+    st.info("Description: " + out_txt + " *r* Successes")
 
     return complementary, inclusive, out_txt
 
