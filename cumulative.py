@@ -127,7 +127,8 @@ class Cumulative:
 
 
     def calc(self, p, r, complementary, inclusive):
-        """Calculate cumulative probabilities.
+        """Send parameters to cached function outside of class to calculate.
+        Write the resulting probability array to the class parameter `P`.
 
         Parameters
         ----------
@@ -141,28 +142,7 @@ class Cumulative:
             Specifies whether edge case is inclusive
         """
 
-        i = 0 # index in P array
-        for n in self.N:
-
-            # Must consider that 1 - P will be executed later
-            if complementary: # At Least or Greater Than
-                r_include = (r-1 if inclusive else r)
-            else: # At most or Less Than
-                r_include = (r if inclusive else r-1)
-
-            # Sum up all exactly x successes
-            sum_exactly = 0
-            for k in range(r_include, -1, -1):
-                exactly = comb(n,k) * p**k * (1-p)**(n-k)
-                sum_exactly += exactly
-
-            # Probability array
-            if complementary:
-                self.P[i] = 1 - sum_exactly
-            else:
-                self.P[i] = sum_exactly
-
-            i += 1
+        self.P = calc_prob(self.N, p, r, complementary, inclusive)
         
         return None
     
@@ -198,6 +178,10 @@ class Cumulative:
                 if n == n_des:
                     self.P_found = self.P[i]
                     self.n_closest = n_des
+            
+            # Only need to retrieve first time threshold is crossed
+            if self.n_found > 0 and self.P_found > 0:
+                break
             
             i += 1
 
@@ -248,6 +232,7 @@ class Cumulative:
         out_txt : str
             Output text description of range conditions
         """
+
         fig, ax = plt.subplots()
 
         ax.set_title(f"Cumulative Probability of {out_txt} {r} Successes in n Trials")
@@ -270,6 +255,57 @@ class Cumulative:
         st.pyplot(fig)
 
         return None
+
+
+@st.experimental_memo
+def calc_prob(N, p, r, complementary, inclusive):
+    """Calculate cumulative probabilities.
+
+    Parameters
+    ----------
+    N : ndarray
+        Array containing numbers of trials ascending
+    p : float
+        Probability of one successful event
+    r : int
+        Number of successes
+    complementary : bool
+        Specifies cumulative probability or its complement
+    inclusive : bool
+        Specifies whether edge case is inclusive
+
+    Returns
+    -------
+    P : ndarray
+        Array of cumulative probabilities corresponding to `N`
+    """
+
+    P = np.zeros(N.shape)
+
+    i = 0 # index in P array
+    for n in N:
+
+        # Must consider that 1 - P will be executed later
+        if complementary: # At Least or Greater Than
+            r_include = (r-1 if inclusive else r)
+        else: # At most or Less Than
+            r_include = (r if inclusive else r-1)
+
+        # Sum up all exactly x successes
+        sum_exactly = 0
+        for k in range(r_include, -1, -1):
+            exactly = comb(n,k) * p**k * (1-p)**(n-k)
+            sum_exactly += exactly
+
+        # Probability array
+        if complementary:
+            P[i] = 1 - sum_exactly
+        else:
+            P[i] = sum_exactly
+
+        i += 1
+
+    return P
 
 
 def params():
@@ -307,7 +343,7 @@ def params():
     p = st.number_input(
         "Probability of event",
         0.0, 1.0, 0.01,
-        step=0.001, format="%.4f"
+        step=0.001, format="%.8f"
         )
     r = st.number_input("Number of successes", 1)
     n_max = st.number_input("Max number of trials", 1, value=500, step=100) + 1

@@ -191,7 +191,8 @@ class Cumulative:
 
 
     def calc(self, p, r, complementary, inclusive):
-        &#34;&#34;&#34;Calculate cumulative probabilities.
+        &#34;&#34;&#34;Send parameters to cached function outside of class to calculate.
+        Write the resulting probability array to the class parameter `P`.
 
         Parameters
         ----------
@@ -205,28 +206,7 @@ class Cumulative:
             Specifies whether edge case is inclusive
         &#34;&#34;&#34;
 
-        i = 0 # index in P array
-        for n in self.N:
-
-            # Must consider that 1 - P will be executed later
-            if complementary: # At Least or Greater Than
-                r_include = (r-1 if inclusive else r)
-            else: # At most or Less Than
-                r_include = (r if inclusive else r-1)
-
-            # Sum up all exactly x successes
-            sum_exactly = 0
-            for k in range(r_include, -1, -1):
-                exactly = comb(n,k) * p**k * (1-p)**(n-k)
-                sum_exactly += exactly
-
-            # Probability array
-            if complementary:
-                self.P[i] = 1 - sum_exactly
-            else:
-                self.P[i] = sum_exactly
-
-            i += 1
+        self.P = calc_prob(self.N, p, r, complementary, inclusive)
         
         return None
     
@@ -262,6 +242,10 @@ class Cumulative:
                 if n == n_des:
                     self.P_found = self.P[i]
                     self.n_closest = n_des
+            
+            # Only need to retrieve first time threshold is crossed
+            if self.n_found &gt; 0 and self.P_found &gt; 0:
+                break
             
             i += 1
 
@@ -312,6 +296,7 @@ class Cumulative:
         out_txt : str
             Output text description of range conditions
         &#34;&#34;&#34;
+
         fig, ax = plt.subplots()
 
         ax.set_title(f&#34;Cumulative Probability of {out_txt} {r} Successes in n Trials&#34;)
@@ -334,6 +319,57 @@ class Cumulative:
         st.pyplot(fig)
 
         return None
+
+
+@st.experimental_memo
+def calc_prob(N, p, r, complementary, inclusive):
+    &#34;&#34;&#34;Calculate cumulative probabilities.
+
+    Parameters
+    ----------
+    N : ndarray
+        Array containing numbers of trials ascending
+    p : float
+        Probability of one successful event
+    r : int
+        Number of successes
+    complementary : bool
+        Specifies cumulative probability or its complement
+    inclusive : bool
+        Specifies whether edge case is inclusive
+
+    Returns
+    -------
+    P : ndarray
+        Array of cumulative probabilities corresponding to `N`
+    &#34;&#34;&#34;
+
+    P = np.zeros(N.shape)
+
+    i = 0 # index in P array
+    for n in N:
+
+        # Must consider that 1 - P will be executed later
+        if complementary: # At Least or Greater Than
+            r_include = (r-1 if inclusive else r)
+        else: # At most or Less Than
+            r_include = (r if inclusive else r-1)
+
+        # Sum up all exactly x successes
+        sum_exactly = 0
+        for k in range(r_include, -1, -1):
+            exactly = comb(n,k) * p**k * (1-p)**(n-k)
+            sum_exactly += exactly
+
+        # Probability array
+        if complementary:
+            P[i] = 1 - sum_exactly
+        else:
+            P[i] = sum_exactly
+
+        i += 1
+
+    return P
 
 
 def params():
@@ -371,7 +407,7 @@ def params():
     p = st.number_input(
         &#34;Probability of event&#34;,
         0.0, 1.0, 0.01,
-        step=0.001, format=&#34;%.4f&#34;
+        step=0.001, format=&#34;%.8f&#34;
         )
     r = st.number_input(&#34;Number of successes&#34;, 1)
     n_max = st.number_input(&#34;Max number of trials&#34;, 1, value=500, step=100) + 1
@@ -441,6 +477,84 @@ if __name__ == &#39;__main__&#39;:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="cumulative.calc_prob"><code class="name flex">
+<span>def <span class="ident">calc_prob</span></span>(<span>N, p, r, complementary, inclusive)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Calculate cumulative probabilities.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>N</code></strong> :&ensp;<code>ndarray</code></dt>
+<dd>Array containing numbers of trials ascending</dd>
+<dt><strong><code>p</code></strong> :&ensp;<code>float</code></dt>
+<dd>Probability of one successful event</dd>
+<dt><strong><code>r</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of successes</dd>
+<dt><strong><code>complementary</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Specifies cumulative probability or its complement</dd>
+<dt><strong><code>inclusive</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Specifies whether edge case is inclusive</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><strong><code>P</code></strong> :&ensp;<code>ndarray</code></dt>
+<dd>Array of cumulative probabilities corresponding to <code>N</code></dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@st.experimental_memo
+def calc_prob(N, p, r, complementary, inclusive):
+    &#34;&#34;&#34;Calculate cumulative probabilities.
+
+    Parameters
+    ----------
+    N : ndarray
+        Array containing numbers of trials ascending
+    p : float
+        Probability of one successful event
+    r : int
+        Number of successes
+    complementary : bool
+        Specifies cumulative probability or its complement
+    inclusive : bool
+        Specifies whether edge case is inclusive
+
+    Returns
+    -------
+    P : ndarray
+        Array of cumulative probabilities corresponding to `N`
+    &#34;&#34;&#34;
+
+    P = np.zeros(N.shape)
+
+    i = 0 # index in P array
+    for n in N:
+
+        # Must consider that 1 - P will be executed later
+        if complementary: # At Least or Greater Than
+            r_include = (r-1 if inclusive else r)
+        else: # At most or Less Than
+            r_include = (r if inclusive else r-1)
+
+        # Sum up all exactly x successes
+        sum_exactly = 0
+        for k in range(r_include, -1, -1):
+            exactly = comb(n,k) * p**k * (1-p)**(n-k)
+            sum_exactly += exactly
+
+        # Probability array
+        if complementary:
+            P[i] = 1 - sum_exactly
+        else:
+            P[i] = sum_exactly
+
+        i += 1
+
+    return P</code></pre>
+</details>
+</dd>
 <dt id="cumulative.download_df"><code class="name flex">
 <span>def <span class="ident">download_df</span></span>(<span>df)</span>
 </code></dt>
@@ -571,7 +685,7 @@ if __name__ == &#39;__main__&#39;:
     p = st.number_input(
         &#34;Probability of event&#34;,
         0.0, 1.0, 0.01,
-        step=0.001, format=&#34;%.4f&#34;
+        step=0.001, format=&#34;%.8f&#34;
         )
     r = st.number_input(&#34;Number of successes&#34;, 1)
     n_max = st.number_input(&#34;Max number of trials&#34;, 1, value=500, step=100) + 1
@@ -675,7 +789,8 @@ if __name__ == &#39;__main__&#39;:
 
 
     def calc(self, p, r, complementary, inclusive):
-        &#34;&#34;&#34;Calculate cumulative probabilities.
+        &#34;&#34;&#34;Send parameters to cached function outside of class to calculate.
+        Write the resulting probability array to the class parameter `P`.
 
         Parameters
         ----------
@@ -689,28 +804,7 @@ if __name__ == &#39;__main__&#39;:
             Specifies whether edge case is inclusive
         &#34;&#34;&#34;
 
-        i = 0 # index in P array
-        for n in self.N:
-
-            # Must consider that 1 - P will be executed later
-            if complementary: # At Least or Greater Than
-                r_include = (r-1 if inclusive else r)
-            else: # At most or Less Than
-                r_include = (r if inclusive else r-1)
-
-            # Sum up all exactly x successes
-            sum_exactly = 0
-            for k in range(r_include, -1, -1):
-                exactly = comb(n,k) * p**k * (1-p)**(n-k)
-                sum_exactly += exactly
-
-            # Probability array
-            if complementary:
-                self.P[i] = 1 - sum_exactly
-            else:
-                self.P[i] = sum_exactly
-
-            i += 1
+        self.P = calc_prob(self.N, p, r, complementary, inclusive)
         
         return None
     
@@ -746,6 +840,10 @@ if __name__ == &#39;__main__&#39;:
                 if n == n_des:
                     self.P_found = self.P[i]
                     self.n_closest = n_des
+            
+            # Only need to retrieve first time threshold is crossed
+            if self.n_found &gt; 0 and self.P_found &gt; 0:
+                break
             
             i += 1
 
@@ -796,6 +894,7 @@ if __name__ == &#39;__main__&#39;:
         out_txt : str
             Output text description of range conditions
         &#34;&#34;&#34;
+
         fig, ax = plt.subplots()
 
         ax.set_title(f&#34;Cumulative Probability of {out_txt} {r} Successes in n Trials&#34;)
@@ -852,7 +951,8 @@ if __name__ == &#39;__main__&#39;:
 <span>def <span class="ident">calc</span></span>(<span>self, p, r, complementary, inclusive)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Calculate cumulative probabilities.</p>
+<div class="desc"><p>Send parameters to cached function outside of class to calculate.
+Write the resulting probability array to the class parameter <code>P</code>.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>p</code></strong> :&ensp;<code>float</code></dt>
@@ -869,7 +969,8 @@ if __name__ == &#39;__main__&#39;:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def calc(self, p, r, complementary, inclusive):
-    &#34;&#34;&#34;Calculate cumulative probabilities.
+    &#34;&#34;&#34;Send parameters to cached function outside of class to calculate.
+    Write the resulting probability array to the class parameter `P`.
 
     Parameters
     ----------
@@ -883,28 +984,7 @@ if __name__ == &#39;__main__&#39;:
         Specifies whether edge case is inclusive
     &#34;&#34;&#34;
 
-    i = 0 # index in P array
-    for n in self.N:
-
-        # Must consider that 1 - P will be executed later
-        if complementary: # At Least or Greater Than
-            r_include = (r-1 if inclusive else r)
-        else: # At most or Less Than
-            r_include = (r if inclusive else r-1)
-
-        # Sum up all exactly x successes
-        sum_exactly = 0
-        for k in range(r_include, -1, -1):
-            exactly = comb(n,k) * p**k * (1-p)**(n-k)
-            sum_exactly += exactly
-
-        # Probability array
-        if complementary:
-            self.P[i] = 1 - sum_exactly
-        else:
-            self.P[i] = sum_exactly
-
-        i += 1
+    self.P = calc_prob(self.N, p, r, complementary, inclusive)
     
     return None</code></pre>
 </details>
@@ -960,6 +1040,10 @@ Find probability at the input number of trials.</p>
                 self.P_found = self.P[i]
                 self.n_closest = n_des
         
+        # Only need to retrieve first time threshold is crossed
+        if self.n_found &gt; 0 and self.P_found &gt; 0:
+            break
+        
         i += 1
 
     return None</code></pre>
@@ -991,6 +1075,7 @@ Find probability at the input number of trials.</p>
     out_txt : str
         Output text description of range conditions
     &#34;&#34;&#34;
+
     fig, ax = plt.subplots()
 
     ax.set_title(f&#34;Cumulative Probability of {out_txt} {r} Successes in n Trials&#34;)
@@ -1085,6 +1170,7 @@ as "FOUND" and the closest data point. Output total probability DataFrame.</p>
 <ul id="index">
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="cumulative.calc_prob" href="#cumulative.calc_prob">calc_prob</a></code></li>
 <li><code><a title="cumulative.download_df" href="#cumulative.download_df">download_df</a></code></li>
 <li><code><a title="cumulative.main" href="#cumulative.main">main</a></code></li>
 <li><code><a title="cumulative.params" href="#cumulative.params">params</a></code></li>
